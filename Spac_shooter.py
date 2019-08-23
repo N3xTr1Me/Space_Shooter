@@ -19,19 +19,36 @@ class Obj():
 
 class Player(Obj):
 
-     def __init__(this, color):
+    def __init__(this, color = 'black'):
         this.x = X*step / 2 - step/2
         this.y = Y*step - step
         this.color = color
         super().draw()
 
+class  Hostile(Obj):
+    hazards = {-1}
+
+    def __init__(this, color = 'red'):
+        this.x = -1
+        this.y = 1
+        while (this.x) in Hostile.hazards:
+            this.x = super().rng(X)
+        Hostile.hazards.add(this.x)
+        this.color = color
+        super().draw()
+
+def enemy_gen():
+    for i in range(X):
+        enemy = Hostile()
+
 master = tk.Tk()
 X = 12
 Y = 11
 step = 80
-canvas = tk.Canvas(master, bg = 'black', height = Y*step, width = X*step)
+canvas = tk.Canvas(master, bg = 'white', height = Y*step, width = X*step)
 
-player = Player('white')
+player = Player()
+enemy_gen()
 
 canvas.pack()
 master.mainloop()
