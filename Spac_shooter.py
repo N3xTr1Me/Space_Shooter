@@ -31,15 +31,20 @@ class  Hostile(Obj):
     def __init__(this, color = 'red'):
         this.x = -1
         this.y = 1
-        while (this.x) in Hostile.hazards:
+        while this.x in Hostile.hazards:
             this.x = super().rng(X)
         Hostile.hazards.add(this.x)
         this.color = color
         super().draw()
 
 def enemy_gen():
-    for i in range(X):
-        enemy = Hostile()
+    for i in range(X-2):
+        p=20
+        r=rn.randint(1,100)
+        if (r<p):
+            enemy = newObject
+        else:
+            enemy = Hostile()
 
 master = tk.Tk()
 X = 12
