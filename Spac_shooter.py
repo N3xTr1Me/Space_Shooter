@@ -1,5 +1,6 @@
 import tkinter as tk
 import random as rn
+import time as tm
 
 class Obj():
 
@@ -33,6 +34,7 @@ class Player(Obj):
     
 class  Hostile(Obj):
     hazards = {-1}
+    enemies = []
 
     def __init__(this, color = 'red'):
         this.x = -1
@@ -41,15 +43,22 @@ class  Hostile(Obj):
             this.x = super().rng(X)
         Hostile.hazards.add(this.x)
         this.color = color
-        super().draw()
+        this.draw()
+
+    def draw(this):
+        enemy = canvas.create_rectangle((this.x, this.y),
+                                            (this.x+step, this.y + step),
+                                             fill = this.color)
+        this.enemies.append(enemy)
 
 class Meteor(Hostile):
     def __init__(this):
         super().__init__('brown')
 
-def enemy_gen():
-    for i in range(X-2):
+def enemy_gen(Q):
+    for i in range(Q-1):
         p=20
+        
         r=rn.randint(1,100)
         if (r<p):
             enemy = Meteor()
@@ -70,16 +79,38 @@ def keyListener(key):
         player.reDraw(-(step), 0)
     elif key == 'Right' or key == 'd':
         player.reDraw(step, 0)
+
+def enemy_mov():
+    global Q
+    for i in range(Q-1):
+        for enemy in Hostile.enemies:
+            enemy.move(enemy, speedX, speedY)
     
-master = tk.Tk()
+gui = tk.Tk()
 X = 12
 Y = 11
 step = 80
-canvas = tk.Canvas(master, bg = 'white', height = Y*step, width = X*step)
+res = f'{X*step}x{Y*step}'
+gui.geometry(res)
+sX, sY = 2,3
+delay = 0.05
+Q = 3
+canvas = tk.Canvas(gui, bg = 'white', height = Y*step, width = X*step)
 
 player = Player()
-enemy_gen()
 
 canvas.pack()
-master.bind('<KeyPress>', k_prss)
-master.mainloop()
+gui.bind('<KeyPress>', k_prss)
+while True:
+    enemy_gen(Q)
+    enemy_mov()
+    gui.update()
+    tm.sleep(delay)
+
+
+
+
+
+
+
+
