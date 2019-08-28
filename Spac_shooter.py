@@ -19,12 +19,16 @@ class Obj():
                                              fill = this.color)
 
 class Player(Obj):
+    hp = 4
 
     def __init__(this, color = 'black'):
-        this.x = X*step / 2 - step/2
+        this.x = X*step / 2
         this.y = Y*step - step
         this.color = color
         super().draw()
+
+    def comparePoz(this, other):
+        return this.x == other.x and this.y == other.y
 
     def reDraw(this, x, y):
         old_x, old_y = this.x, this.y
@@ -38,7 +42,7 @@ class  Hostile(Obj):
 
     def __init__(this, color = 'red'):
         this.x = -1
-        this.y = 1
+        this.y = 0
         while this.x in Hostile.hazards:
             this.x = super().rng(X)
         Hostile.hazards.add(this.x)
@@ -47,8 +51,8 @@ class  Hostile(Obj):
 
     def draw(this):
         enemy = canvas.create_rectangle((this.x, this.y),
-                                            (this.x+step, this.y + step),
-                                             fill = this.color)
+                                        (this.x+step, this.y + step),
+                                         fill = this.color)
         this.enemies.append(enemy)
 
 class Meteor(Hostile):
@@ -82,28 +86,45 @@ def keyListener(key):
 
 def enemy_mov():
     global Q
-    for i in range(Q-1):
+    for i in range(Q):
         for enemy in Hostile.enemies:
-            enemy.move(enemy, speedX, speedY)
-    
+            canvas.move(enemy, sX*step, sY*step)
+
+def damage():
+    for enemy in Hostile.enemies:
+        if player.comparePoz(coord_get(enemy)):
+            player.hp -= 1
+            break
+
+def gameOver():
+    if Player.hp < 1:
+        print('You lose')
+        print('Game over')
+
+def coord_get(obj_id):
+    x, y = canvas.coords(obj_id)[:2]
+    print(x,y)
+   
 gui = tk.Tk()
 X = 12
-Y = 11
+Y = 12
 step = 80
 res = f'{X*step}x{Y*step}'
 gui.geometry(res)
-sX, sY = 2,3
-delay = 0.05
-Q = 3
+sX, sY = 0,2
+delay = 0.5
+Q = 6
 canvas = tk.Canvas(gui, bg = 'white', height = Y*step, width = X*step)
 
 player = Player()
+enemy_gen(Q)
 
 canvas.pack()
 gui.bind('<KeyPress>', k_prss)
 while True:
-    enemy_gen(Q)
     enemy_mov()
+    damage()
+    gameOver()
     gui.update()
     tm.sleep(delay)
 
