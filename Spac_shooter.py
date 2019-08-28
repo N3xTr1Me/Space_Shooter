@@ -27,8 +27,8 @@ class Player(Obj):
         this.color = color
         super().draw()
 
-    def comparePoz(this, other):
-        return this.x == other.x and this.y == other.y
+    def comparePoz(this, ot_x, ot_y):
+        return this.x == ot_x and this.y == ot_y
 
     def reDraw(this, x, y):
         old_x, old_y = this.x, this.y
@@ -55,12 +55,23 @@ class  Hostile(Obj):
                                          fill = this.color)
         this.enemies.append(enemy)
 
+    def move():
+        global Q, X, Y
+        for i in range(Q):
+            for enemy in Hostile.enemies:
+                x, y = coord_get(enemy)
+                if y <= Y*step:
+                    print(x,y)
+                    canvas.move(enemy, 0, step)
+                else:
+                    Hostile.enemies.remove(enemy)
+
 class Meteor(Hostile):
     def __init__(this):
         super().__init__('brown')
 
 def enemy_gen(Q):
-    for i in range(Q-1):
+    for i in range(Q):
         p=20
         
         r=rn.randint(1,100)
@@ -84,15 +95,10 @@ def keyListener(key):
     elif key == 'Right' or key == 'd':
         player.reDraw(step, 0)
 
-def enemy_mov():
-    global Q
-    for i in range(Q):
-        for enemy in Hostile.enemies:
-            canvas.move(enemy, sX*step, sY*step)
-
 def damage():
     for enemy in Hostile.enemies:
-        if player.comparePoz(coord_get(enemy)):
+        x,y = coord_get(enemy)
+        if player.comparePoz(x, y):
             player.hp -= 1
             break
 
@@ -103,16 +109,16 @@ def gameOver():
 
 def coord_get(obj_id):
     x, y = canvas.coords(obj_id)[:2]
-    print(x,y)
-   
+    return x, y
+    
 gui = tk.Tk()
 X = 12
 Y = 12
 step = 80
 res = f'{X*step}x{Y*step}'
 gui.geometry(res)
-sX, sY = 0,2
-delay = 0.5
+sX, sY = 0,1
+delay = 0
 Q = 6
 canvas = tk.Canvas(gui, bg = 'white', height = Y*step, width = X*step)
 
@@ -122,11 +128,15 @@ enemy_gen(Q)
 canvas.pack()
 gui.bind('<KeyPress>', k_prss)
 while True:
-    enemy_mov()
-    damage()
-    gameOver()
-    gui.update()
-    tm.sleep(delay)
+    if delay >= 200:
+        Hostile.move()
+        delay == 0
+    else:
+        delay += 1
+        damage()
+        gameOver()
+        tm.sleep(0.05)
+        gui.update()
 
 
 
