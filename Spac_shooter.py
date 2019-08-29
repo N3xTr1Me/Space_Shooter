@@ -39,6 +39,7 @@ class Player(Obj):
 class  Hostile(Obj):
     hazards = {-1}
     enemies = []
+    hp = 20
 
     def __init__(this, color = 'red'):
         this.x = -1
@@ -67,6 +68,7 @@ class  Hostile(Obj):
                     Hostile.enemies.remove(enemy)
 
 class Meteor(Hostile):
+    hp = 40
     def __init__(this):
         super().__init__('brown')
 
@@ -88,12 +90,20 @@ def k_prss(event):
 def keyListener(key):
     if key == 'Up' or key == 'w':
         player.reDraw(0, -(step))
+        damage()
+        gameOver()
     elif key == 'Down' or key == 's':
         player.reDraw(0, step)
+        damage()
+        gameOver()
     elif key == 'Left' or key == 'a':
         player.reDraw(-(step), 0)
+        damage()
+        gameOver()
     elif key == 'Right' or key == 'd':
         player.reDraw(step, 0)
+        damage()
+        gameOver()
 
 def damage():
     for enemy in Hostile.enemies:
@@ -103,7 +113,7 @@ def damage():
             break
 
 def gameOver():
-    if Player.hp < 1:
+    if player.hp < 1:
         print('You lose')
         print('Game over')
 
@@ -133,8 +143,6 @@ while True:
         delay == 0
     else:
         delay += 1
-        damage()
-        gameOver()
         tm.sleep(0.05)
         gui.update()
 
