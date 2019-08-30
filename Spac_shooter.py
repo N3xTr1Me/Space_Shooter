@@ -14,9 +14,7 @@ class Obj():
         return rn.randint(1, limit - 1) * step
 
     def draw(this):
-        this.body = canvas.create_rectangle((this.x, this.y),
-                                            (this.x+step, this.y + step),
-                                             fill = this.color)
+        this.body = canvas.create_image((this.x, this.y), image=player_image, anchor="nw")
 
 class Player(Obj):
     hp = 4
@@ -56,16 +54,15 @@ class  Hostile(Obj):
                                          fill = this.color)
         this.enemies.append(enemy)
 
-    def move():
-        global Q, X, Y
-        for i in range(Q):
-            for enemy in Hostile.enemies:
-                x, y = coord_get(enemy)
-                if y <= Y*step:
-                    print(x,y)
-                    canvas.move(enemy, 0, step)
-                else:
-                    Hostile.enemies.remove(enemy)
+    @staticmethod
+    def move(enemy):
+        global X, Y
+        x, y = coord_get(enemy)
+        if y <= Y*step:
+            print(x,y)
+            canvas.move(enemy, 0, step)
+        else:
+            Hostile.enemies.remove(enemy)
 
 class Meteor(Hostile):
     hp = 40
@@ -81,6 +78,7 @@ def enemy_gen(Q):
             enemy = Meteor()
         else:
             enemy = Hostile()
+            threats.append(enemy)
 
 def k_prss(event):
     keys = {'Up', 'w', 'Down', 's', 'Left', 'a', 'Right', 'd'}
@@ -120,6 +118,11 @@ def gameOver():
 def coord_get(obj_id):
     x, y = canvas.coords(obj_id)[:2]
     return x, y
+
+def movement():
+    for enemy in Hostile.enemies:
+        for threat in threats:
+            threat.move(enemy)
     
 gui = tk.Tk()
 X = 12
@@ -129,8 +132,10 @@ res = f'{X*step}x{Y*step}'
 gui.geometry(res)
 sX, sY = 0,1
 delay = 0
-Q = 6
+Q = 8
+threats = []
 canvas = tk.Canvas(gui, bg = 'white', height = Y*step, width = X*step)
+player_image = tk.PhotoImage(file="images/player.png")
 
 player = Player()
 enemy_gen(Q)
@@ -139,8 +144,10 @@ canvas.pack()
 gui.bind('<KeyPress>', k_prss)
 while True:
     if delay >= 200:
-        Hostile.move()
         delay == 0
+        movement()
+        enemy_gen(Q)
+        gui.update()
     else:
         delay += 1
         tm.sleep(0.05)
