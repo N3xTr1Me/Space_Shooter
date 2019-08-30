@@ -14,7 +14,17 @@ class Obj():
         return rn.randint(1, limit - 1) * step
 
     def draw(this):
-        this.body = canvas.create_image((this.x, this.y), image=player_image, anchor="nw")
+        this.body = canvas.create_rectangle((this.x, this.y),
+                                            (this.x+step, this.y + step),
+                                             fill = this.color)
+
+    def move(enemy):
+        x, y = coord_get(enemy.body)
+        print(x,y)
+        if y <= Y*step:
+            canvas.move(enemy.body, 0, step)
+        else:
+            Hostile.enemies.remove(enemy)
 
 class Player(Obj):
     hp = 4
@@ -37,7 +47,6 @@ class Player(Obj):
 class  Hostile(Obj):
     hazards = {-1}
     enemies = []
-    hp = 20
 
     def __init__(this, color = 'red'):
         this.x = -1
@@ -54,29 +63,19 @@ class  Hostile(Obj):
                                          fill = this.color)
         this.enemies.append(this)
 
-    def move(enemy):
-        x, y = coord_get(enemy.body)
-        print(x,y)
-        if y <= Y*step:
-            canvas.move(enemy.body, 0, step)
-        else:
-            Hostile.enemies.remove(enemy)
-
 class Meteor(Hostile):
-    hp = 40
     def __init__(this):
         super().__init__('brown')
 
 def enemy_gen(Q):
     for i in range(Q):
-        #p=20
+        p=20
         
-        #r=rn.randint(1,100)
-        #if (r<p):
-            #enemy = Meteor()
-        #else:
-        enemy = Hostile()
-        threats.append(enemy)
+        r=rn.randint(1,100)
+        if (r<p):
+            enemy = Meteor()
+        else:
+            enemy = Hostile()
 
 def k_prss(event):
     keys = {'Up', 'w', 'Down', 's', 'Left', 'a', 'Right', 'd'}
@@ -86,20 +85,12 @@ def k_prss(event):
 def keyListener(key):
     if key == 'Up' or key == 'w':
         player.reDraw(0, -(step))
-        damage()
-        gameOver()
     elif key == 'Down' or key == 's':
         player.reDraw(0, step)
-        damage()
-        gameOver()
     elif key == 'Left' or key == 'a':
         player.reDraw(-(step), 0)
-        damage()
-        gameOver()
     elif key == 'Right' or key == 'd':
         player.reDraw(step, 0)
-        damage()
-        gameOver()
 
 def damage():
     for enemy in Hostile.enemies:
@@ -109,7 +100,7 @@ def damage():
             break
 
 def gameOver():
-    if player.hp < 1:
+    if Player.hp < 1:
         print('You lose')
         print('Game over')
 
@@ -117,7 +108,7 @@ def coord_get(obj_id):
     x, y = canvas.coords(obj_id)[:2]
     return x, y
 
-def movement():
+def moving():
     for enemy in Hostile.enemies:
         enemy.move()
     
@@ -129,12 +120,8 @@ res = f'{X*step}x{Y*step}'
 gui.geometry(res)
 sX, sY = 0,1
 delay = 0
-Q = 8
-threats = []
-canvas = tk.Canvas(gui, bg = 'black', height = Y*step, width = X*step)
-player_image = tk.PhotoImage(file="images/player.png")
-enemy_image = tk.PhotoImage(file="images/enemy.png")
-meteor_image = tk.PhotoImage(file="images/meteor.png")
+Q = 6
+canvas = tk.Canvas(gui, bg = 'white', height = Y*step, width = X*step)
 
 player = Player()
 enemy_gen(Q)
@@ -142,13 +129,13 @@ enemy_gen(Q)
 canvas.pack()
 gui.bind('<KeyPress>', k_prss)
 while True:
-    if delay >= 200:
+    if delay >= 20:
+        moving()
         delay = 0
-        movement()
-        enemy_gen(Q)
-        gui.update()
     else:
         delay += 1
+        damage()
+        gameOver()
         tm.sleep(0.05)
         gui.update()
 
